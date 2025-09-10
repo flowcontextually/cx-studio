@@ -2,26 +2,80 @@
   "name": "cx-studio",
   "version": "0.1.0",
   "private": true,
+  "main": "electron-main.js",
+  "description": "Contextually Studio: The UI for the Contextual Shell Engine.",
+  "author": {
+    "name": "dpwanjala",
+    "email": "dp.wanjala@example.com"
+  },
+  "homepage": "https://github.com/flowcontextually/cx-studio",
   "scripts": {
+    "electron:dev": "concurrently \"npm:dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:build": "npm run build && electron-builder",
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@mantine/code-highlight": "^8.3.0",
+    "@mantine/core": "^8.3.0",
+    "@mantine/hooks": "^8.3.0",
+    "@mantine/notifications": "^8.3.0",
+    "@tabler/icons-react": "^3.34.1",
+    "mantine-datatable": "^8.2.0",
+    "nanoid": "^5.1.5",
+    "next": "15.5.2",
+    "postcss-preset-mantine": "^1.18.0",
+    "rc-tree": "^5.13.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.2"
+    "react-resizable-panels": "^3.0.5",
+    "react-use-websocket": "^4.13.0",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
+    "concurrently": "^9.2.1",
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wait-on": "^8.0.4"
+  },
+  "build": {
+    "appId": "com.contextually.studio",
+    "productName": "Contextually Studio",
+    "files": [
+      "out/**/*",
+      "electron-main.js",
+      "electron-preload.js"
+    ],
+    "extraResources": [
+      {
+        "from": "../cx-shell/dist/cx",
+        "to": "cx-server"
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "maintainer": "dpwanjala <dp.wanjala@example.com>",
+      "category": "Development"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    }
   }
 }

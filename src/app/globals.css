@@ -24,3 +24,35 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Add these styles at the end of the file */
+
+.rc-tree {
+  padding: 5px;
+}
+.rc-tree-treenode {
+  display: flex;
+  align-items: center;
+  padding: 2px 0;
+}
+.rc-tree-treenode-switcher-open .rc-tree-switcher-icon,
+.rc-tree-treenode-switcher-close .rc-tree-switcher-icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+.rc-tree-node-content-wrapper {
+  padding: 0 5px;
+  cursor: pointer;
+}
+.rc-tree-node-content-wrapper:hover {
+  background-color: #f0f0f0;
+}
+.dark .rc-tree-node-content-wrapper:hover {
+  background-color: #374151; /* gray-700 for dark mode */
+}
+.rc-tree-node-selected {
+  background-color: #dbeafe !important; /* blue-100 */
+}
+.dark .rc-tree-node-selected {
+  background-color: #3b82f6 !important; /* blue-500 */
+}
