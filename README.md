@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Contextually Studio (`cx-studio`)
 
-## Getting Started
+Welcome to **Contextually Studio**, the official web and desktop UI for the **Contextually** platform. This repository contains the source code for a modern, interactive notebook-style interface for the `cx-shell` engine. It enables visual workflow creation, data exploration, and agent-driven automation.
 
-First, run the development server:
+This application is built with **Next.js**, **React**, **TypeScript**, **Mantine UI**, and is packaged as a cross-platform desktop application using **Electron**.
+
+---
+
+## 🏛️ Architecture
+
+Contextually Studio is the "head" for the headless `cx-shell` engine. It follows a robust, decoupled architecture:
+
+1.  **The Engine (`cx-server`):** A powerful, stateful Python backend that executes all commands and manages the user's workspace. It is a dependency of this project.
+2.  **The UI (`cx-studio`):** This React/Next.js single-page application, which provides the rich, interactive user experience.
+3.  **The Communication Layer:** The UI communicates with the engine in real-time over a secure, local WebSocket connection.
+4.  **The Desktop Shell (Electron):** An Electron wrapper packages the UI and the engine together into a single, easy-to-install desktop application, eliminating the need for any manual setup by the end-user.
+
+---
+
+## 🚀 Getting Started (Development)
+
+To run the application in a local development environment, you will need two separate terminal sessions.
+
+### Prerequisites
+
+- **Node.js** (v20 or later) and **npm**.
+- A complete, working setup of the `cx-shell` repository.
+
+### 1. Run the Backend Server
+
+In your first terminal, start the `cx-server`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Navigate to your cx-shell repository
+cd /path/to/your/cx-shell
+
+# Run the local server
+cx serve
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The server will be running at http://127.0.0.1:8888.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. Run the Frontend UI
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+In your second terminal, start the Next.js development server:
 
-## Learn More
+```bash
+# Navigate to this repository (cx-studio)
+cd /path/to/your/cx-studio
 
-To learn more about Next.js, take a look at the following resources:
+# Install dependencies
+npm install
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Run the development server
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The application will be available at **http://localhost:3000**. Open this URL in your web browser. The UI should connect to the cx-server automatically.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📦 Building the Production Application
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+To build the final, distributable desktop application, use the provided electron:build script.
+
+**Important:** This process requires that you have already built a production version of the cx executable in the cx-shell repository.
+
+```bash
+# 1. First, ensure the backend executable is up-to-date
+cd /path/to/your/cx-shell
+./build.sh
+
+# 2. Then, build the Electron application
+cd /path/to/your/cx-studio
+npm run electron:build
+```
+
+The final installers (.AppImage, .deb, etc.) will be located in the `cx-studio/dist/` directory.
