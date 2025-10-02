@@ -32,6 +32,15 @@ export default function TopBar() {
     });
   };
 
+  const handleRunAll = () => {
+    if (!currentPage?.id) return;
+    sendJsonMessage({
+      type: "RUN_PAGE",
+      command_id: `run-page-${nanoid()}`,
+      payload: { page_id: currentPage.id },
+    });
+  };
+
   return (
     <Box
       component="header"
@@ -107,8 +116,34 @@ export default function TopBar() {
           </Menu.Dropdown>
         </Menu>
 
+        <Menu shadow="md" width={200}>
+          <Menu.Target>
+            <Button variant="subtle" size="xs">
+              Run
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item
+              onClick={handleRunAll}
+              disabled={!currentPage}
+              rightSection={
+                <Text size="xs" c="dimmed">
+                  Ctrl+F5
+                </Text>
+              }
+            >
+              Run All Blocks
+            </Menu.Item>
+            <Menu.Item disabled>Run All Above</Menu.Item>
+            <Menu.Item disabled>Run All Below</Menu.Item>
+            <Menu.Divider />
+            <Menu.Item disabled>Stop Execution</Menu.Item>
+            <Menu.Item disabled>Clear All Outputs</Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+
         {/* Placeholder for future menus */}
-        <Button variant="subtle" size="xs" disabled>
+        {/* <Button variant="subtle" size="xs" disabled>
           Edit
         </Button>
         <Button variant="subtle" size="xs" disabled>
@@ -116,7 +151,7 @@ export default function TopBar() {
         </Button>
         <Button variant="subtle" size="xs" disabled>
           Help
-        </Button>
+        </Button> */}
       </Group>
 
       {/* Center/Right Section for document status */}

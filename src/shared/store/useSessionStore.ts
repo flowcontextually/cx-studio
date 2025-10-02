@@ -55,8 +55,8 @@ export const useSessionStore = create<SessionStore>((set) => ({
   blockResults: {}, // Initialize new state
   selectedBlockId: null, // Initialize new state
   isNavigatorVisible: true,
-  isInspectorVisible: true,
-  isTerminalVisible: true,
+  isInspectorVisible: false,
+  isTerminalVisible: false,
   setConnections: (connections) => set({ connections }),
   setVariables: (variables) => set({ variables }),
   setFlows: (flows) => set({ flows }),
