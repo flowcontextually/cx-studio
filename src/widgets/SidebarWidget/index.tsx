@@ -16,8 +16,15 @@ import NavigationItem from "./NavigationItem";
 import { CommandResultPayload } from "@/shared/types/server"; // Import the specific payload type
 
 export default function SidebarWidget() {
-  const { connections, variables, flows, queries, setFlows, setQueries } =
-    useSessionStore();
+  const {
+    connections,
+    variables,
+    flows,
+    queries,
+    setFlows,
+    setQueries,
+    setCurrentPage,
+  } = useSessionStore();
   const { sendJsonMessage, readyState } = useWebSocket();
   const lastJsonMessage = useSessionStore((state) => state.lastJsonMessage);
 
@@ -37,6 +44,13 @@ export default function SidebarWidget() {
   }, [readyState, sendJsonMessage, flows.length, queries.length]);
 
   useEffect(() => {
+    if (!lastJsonMessage) return;
+
+    const { type, command_id, payload } = lastJsonMessage;
+    if (type === "PAGE_LOADED") {
+      setCurrentPage(payload as any); // Set the current page in our global store
+      return;
+    }
     if (
       lastJsonMessage?.type === "RESULT_SUCCESS" &&
       lastJsonMessage.command_id.startsWith("sidebar-init-")
@@ -62,7 +76,21 @@ export default function SidebarWidget() {
       }
       // --- END TYPE GUARD FIX ---
     }
-  }, [lastJsonMessage, setFlows, setQueries]);
+  }, [lastJsonMessage, setFlows, setQueries, setCurrentPage]);
+
+  const handleFlowClick = (flowName: string) => {
+    // This 'flowName' is the full namespaced ID
+    console.log("Requesting to load page:", flowName);
+    sendJsonMessage({
+      type: "LOAD_PAGE",
+      command_id: `load-page-${nanoid()}`,
+      payload: {
+        // We are already sending the full namespaced ID here, which is correct.
+        // The problem is that the 'ContextualPage' model doesn't store it.
+        page_name: flowName,
+      },
+    });
+  };
 
   return (
     <aside className="h-full w-full flex flex-col bg-gray-100 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
@@ -112,11 +140,10 @@ export default function SidebarWidget() {
         <CollapsibleSection title="Flows" icon={IconFileCode} isExpanded={true}>
           {flows.length > 0 ? (
             flows.map((flow) => (
-              <NavigationItem
-                key={flow.Name}
-                title={flow.Name}
-                icon={IconFileCode}
-              />
+              // --- UPDATE NavigationItem to be clickable ---
+              <div key={flow.Name} onClick={() => handleFlowClick(flow.Name)}>
+                <NavigationItem title={flow.Name} icon={IconFileCode} />
+              </div>
             ))
           ) : (
             <NavigationItem title="No flows found" isSubtle />

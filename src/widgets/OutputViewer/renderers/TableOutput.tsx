@@ -1,72 +1,76 @@
-"use client";
+// /home/dpwanjala/repositories/cx-studio/src/widgets/OutputViewer/renderers/TableOutput.tsx
 
 import React, { useMemo } from "react";
-import { DataTable } from "mantine-datatable";
-import { nanoid } from "nanoid"; // We'll use this for unique keys
+import { HotTable } from "@handsontable/react-wrapper";
+import { Text } from "@mantine/core";
+// --- START OF FIX: Import types from Handsontable ---
+import { Handsontable } from "@/shared/lib/handsontable";
+// --- END OF FIX ---
 
 interface TableOutputProps {
   data: Record<string, any>[];
 }
 
 export default function TableOutput({ data }: TableOutputProps) {
-  // --- THIS IS THE FIX ---
-  // 1. We add a unique `id` to each record for React's key prop.
-  // 2. We handle the "no records" text explicitly.
-  const recordsWithIds = useMemo(() => {
-    if (!data || data.length === 0) {
-      return [];
-    }
-    // Mantine DataTable uses the 'id' property by default for keys.
-    // Let's ensure every record has one. We'll try to use a real ID
-    // field if it exists, otherwise we generate one with nanoid.
-    return data.map((record) => ({
-      ...record,
-      id: record.id || record.ID || record.Id || nanoid(),
-    }));
-  }, [data]);
-
-  const columns = useMemo(() => {
-    if (!recordsWithIds || recordsWithIds.length === 0) return [];
-    const allKeys = new Set<string>();
-    recordsWithIds.forEach((row) => {
-      // We don't want to show our internal 'id' column if we generated it
-      Object.keys(row).forEach((key) => {
-        if (key !== "id" || "id" in data[0] || "ID" in data[0]) {
-          allKeys.add(key);
-        }
-      });
-    });
-
-    return Array.from(allKeys).map((key) => ({
-      accessor: key,
-      title: key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-      render: (record: Record<string, any>) => {
-        const value = record[key];
-        if (typeof value === "object" && value !== null)
-          return JSON.stringify(value);
-        return String(value ?? "");
-      },
-    }));
-  }, [recordsWithIds, data]);
-
-  // 2. Explicitly handle the "no records" state.
-  if (recordsWithIds.length === 0) {
-    return <p>No records to display.</p>;
+  if (!data || data.length === 0) {
+    return <Text c="dimmed">No records to display.</Text>;
   }
 
+  const { colHeaders, columns, tableData } = useMemo(() => {
+    const headers = Object.keys(data[0]);
+
+    // --- START OF FIX: Define types for the renderer function ---
+    const columnSettings = headers.map((key) => ({
+      data: key,
+      title: key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+      // Type the arguments for the custom renderer function
+      renderer: (
+        _instance: Handsontable.Core, // We use an underscore to indicate it's unused
+        td: HTMLTableCellElement,
+        _row: number,
+        _col: number,
+        _prop: string | number,
+        value: any,
+        _cellProperties: Handsontable.CellProperties
+      ) => {
+        // Now TypeScript knows what 'td' and 'value' are
+        if (typeof value === "object" && value !== null) {
+          td.innerText = JSON.stringify(value);
+        } else {
+          td.innerText = String(value ?? "");
+        }
+        return td;
+      },
+    }));
+    // --- END OF FIX ---
+
+    return { colHeaders: headers, columns: columnSettings, tableData: data };
+  }, [data]);
+
+  // ... rest of the component remains the same
   return (
-    <DataTable
-      withTableBorder
-      borderRadius="sm"
-      withColumnBorders
-      striped
-      highlightOnHover
-      records={recordsWithIds}
-      columns={columns}
-      // 3. Tell the table how to find our unique key.
-      //   recordIdAccessor="id"
-      // 4. Provide a custom message for when there's no data to display.
-      noRecordsText="No records to display"
-    />
+    <div
+      className="handsontable-container"
+      style={{ width: "100%", height: "auto" }}
+    >
+      <HotTable
+        data={tableData}
+        colHeaders={colHeaders}
+        columns={columns}
+        rowHeaders={true}
+        height="auto"
+        width="100%"
+        autoWrapRow={true}
+        autoWrapCol={true}
+        manualColumnResize={true}
+        manualRowResize={true}
+        colWidths={150}
+        filters={true}
+        dropdownMenu={true}
+        columnSorting={true}
+        stretchH="all"
+        licenseKey="non-commercial-and-evaluation"
+      />
+    </div>
   );
 }

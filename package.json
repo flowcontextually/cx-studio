@@ -18,12 +18,18 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@handsontable/react-wrapper": "^16.1.1",
     "@mantine/code-highlight": "^8.3.0",
     "@mantine/core": "^8.3.0",
     "@mantine/hooks": "^8.3.0",
     "@mantine/notifications": "^8.3.0",
+    "@monaco-editor/react": "^4.7.0",
     "@tabler/icons-react": "^3.34.1",
+    "@types/markdown-it": "^14.1.2",
+    "handsontable": "^16.1.1",
+    "js-yaml": "^4.1.0",
     "mantine-datatable": "^8.2.0",
+    "markdown-it": "^14.1.0",
     "nanoid": "^5.1.5",
     "next": "15.5.2",
     "postcss-preset-mantine": "^1.18.0",
@@ -32,11 +38,13 @@
     "react-dom": "19.1.0",
     "react-resizable-panels": "^3.0.5",
     "react-use-websocket": "^4.13.0",
+    "yaml": "^2.8.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
