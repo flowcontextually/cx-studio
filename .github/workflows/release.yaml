@@ -86,8 +86,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cx-studio-${{ matrix.os }}
-          path: dist/*.{AppImage,deb,dmg,msi,exe}
-
+          # This precise glob matches the known output formats from electron-builder.
+          # It looks for files that START with 'Contextually Studio' and end with the correct extension.
+          path: |
+            dist/Contextually Studio*.exe
+            dist/Contextually-Studio-*.AppImage
+            dist/Contextually-Studio-*.dmg
+            dist/Contextually-Studio-*.deb
+            dist/Contextually-Studio-*.msi
+          # Tell the action not to fail if one of the patterns doesn't match (e.g., no .dmg on Windows)
+          if-no-files-found: ignore
   release:
     name: Create GitHub Release
     needs: build
