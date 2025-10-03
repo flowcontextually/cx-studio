@@ -68,7 +68,7 @@ jobs:
           fi
 
           # The executable is inside a 'dist' folder in the archive
-          mv ./bin/dist/${EXECUTABLE_NAME} ./resources/cx-server
+          mv ./bin/${EXECUTABLE_NAME} ./resources/cx-server
 
           if [[ "${{ runner.os }}" != "Windows" ]]; then
             chmod +x ./resources/cx-server
