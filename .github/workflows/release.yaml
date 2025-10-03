@@ -32,7 +32,7 @@ jobs:
         uses: robinraju/release-downloader@v1
         with:
           repository: "flowcontextually/cx-shell" # The repo to download from
-          tag: "v0.6.0" # IMPORTANT: For now, we hardcode the version. In a real pipeline, you'd make this dynamic.
+          tag: "v0.7.0" # IMPORTANT: For now, we hardcode the version. In a real pipeline, you'd make this dynamic.
           fileName: "cx-*-${{ runner.os }}.*" # A pattern to match the correct asset
           tarBall: false
           zipBall: false
