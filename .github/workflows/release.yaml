@@ -9,10 +9,9 @@ jobs:
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - name: Checkout cx-studio code
@@ -31,7 +30,7 @@ jobs:
         id: set_asset_name
         shell: bash
         run: |
-          VERSION="v0.7.0" # This must match the version we are downloading
+          VERSION="v0.7.0"
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             echo "ASSET_NAME=cx-${VERSION}-windows-amd64.zip" >> $GITHUB_ENV
           elif [[ "${{ runner.os }}" == "macOS" ]]; then
@@ -45,7 +44,6 @@ jobs:
         with:
           repository: "flowcontextually/cx-shell"
           tag: "v0.7.0"
-          # Use the exact, full filename. No wildcards.
           fileName: "${{ env.ASSET_NAME }}"
           out-file-path: "./bin/"
 
@@ -55,21 +53,16 @@ jobs:
           mkdir -p ./resources
           ARCHIVE=$(find ./bin -type f -name "cx-*.zip" -o -name "cx-*.tar.gz")
           echo "Found archive: $ARCHIVE"
-
           if [[ "$ARCHIVE" == *.zip ]]; then
             unzip "$ARCHIVE" -d ./bin
           else
             tar -xzf "$ARCHIVE" -C ./bin
           fi
-
           EXECUTABLE_NAME="cx"
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             EXECUTABLE_NAME="cx.exe"
           fi
-
-          # The executable is inside a 'dist' folder in the archive
           mv ./bin/${EXECUTABLE_NAME} ./resources/cx-server
-
           if [[ "${{ runner.os }}" != "Windows" ]]; then
             chmod +x ./resources/cx-server
           fi
@@ -81,25 +74,25 @@ jobs:
 
       # --- START OF DEFINITIVE FIX ---
       - name: Build and package the application
-        # The 'env' block has been removed as it was empty and causing a syntax error.
-        # If we need it later for signing, it would be a top-level key for this step,
-        # at the same indentation as 'name' and 'run'.
-        run: npm run electron:build
+        # We tell electron-builder NEVER to auto-publish.
+        # The 'release' job is responsible for publishing.
+        run: npm run electron:build -- --publish never
       # --- END OF DEFINITIVE FIX ---
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: cx-studio-${{ matrix.os }}
-          path: dist/*.{AppImage,deb,dmg,msi,exe} # Added .msi for windows
+          path: dist/*.{AppImage,deb,dmg,msi,exe}
 
   release:
     name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
+    # --- PERMISSIONS ARE ONLY NEEDED HERE ---
     permissions:
       contents: write
-
+    # --- END ---
     steps:
       - name: Download all installer artifacts
         uses: actions/download-artifact@v4
