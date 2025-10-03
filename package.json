@@ -68,7 +68,7 @@
     ],
     "extraResources": [
       {
-        "from": "../cx-shell/dist/cx",
+        "from": "./resources/cx-server",
         "to": "cx-server"
       }
     ],
