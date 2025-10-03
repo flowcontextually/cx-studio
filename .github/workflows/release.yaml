@@ -27,12 +27,17 @@ jobs:
       - name: Install npm dependencies
         run: npm install
 
+      - name: Set OS Identifier
+        id: set_os
+        shell: bash
+        run: echo "OS_ID=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Download cx-server artifact
         uses: robinraju/release-downloader@v1
         with:
           repository: "flowcontextually/cx-shell"
           tag: "v0.7.0"
-          fileName: "cx-*-${{ runner.os }}.*"
+          fileName: "cx-*-${{ env.OS_ID }}.*"
           out-file-path: "./bin/"
 
       - name: Prepare cx-server executable
