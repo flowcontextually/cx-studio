@@ -21,77 +21,70 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20" # Use a specific LTS version
+          node-version: "20"
           cache: "npm"
 
       - name: Install npm dependencies
         run: npm install
 
-      # --- This is the key step to get the backend executable ---
       - name: Download cx-server artifact
         uses: robinraju/release-downloader@v1
         with:
-          repository: "flowcontextually/cx-shell" # The repo to download from
-          tag: "v0.7.0" # IMPORTANT: For now, we hardcode the version. In a real pipeline, you'd make this dynamic.
-          fileName: "cx-*-${{ runner.os }}.*" # A pattern to match the correct asset
-          tarBall: false
-          zipBall: false
-          out-file-path: "./bin/" # Download it to a local 'bin' directory
+          repository: "flowcontextually/cx-shell"
+          tag: "v0.7.0"
+          fileName: "cx-*-${{ runner.os }}.*"
+          out-file-path: "./bin/"
 
       - name: Prepare cx-server executable
         shell: bash
         run: |
-          mkdir -p ./resources # electron-builder will look here for extraResources
-          # Find the downloaded file (which could be a .zip or .tar.gz)
+          mkdir -p ./resources
           ARCHIVE=$(find ./bin -type f -name "cx-*.zip" -o -name "cx-*.tar.gz")
           echo "Found archive: $ARCHIVE"
 
-          # Extract the archive
           if [[ "$ARCHIVE" == *.zip ]]; then
             unzip "$ARCHIVE" -d ./bin
           else
             tar -xzf "$ARCHIVE" -C ./bin
           fi
 
-          # Find the executable and move it to where electron-builder expects it
           EXECUTABLE_NAME="cx"
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             EXECUTABLE_NAME="cx.exe"
           fi
 
+          # The executable is inside a 'dist' folder in the archive
           mv ./bin/dist/${EXECUTABLE_NAME} ./resources/cx-server
 
-          # Make it executable on Linux/macOS
           if [[ "${{ runner.os }}" != "Windows" ]]; then
             chmod +x ./resources/cx-server
           fi
 
       - name: Update package.json for build
-        # This step modifies the package.json to use the local, downloaded cx-server
-        # instead of a relative path. This makes the CI build self-contained.
         run: |
           npm install -g json
           json -I -f package.json -e "this.build.extraResources=[{'from':'./resources/cx-server','to':'cx-server'}]"
 
+      # --- START OF DEFINITIVE FIX ---
       - name: Build and package the application
+        # The 'env' block has been removed as it was empty and causing a syntax error.
+        # If we need it later for signing, it would be a top-level key for this step,
+        # at the same indentation as 'name' and 'run'.
         run: npm run electron:build
-        env:
-          # Required for macOS and Windows code signing in a real-world scenario
-          # For now, we can skip signing for this test.
-          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # --- END OF DEFINITIVE FIX ---
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: cx-studio-${{ matrix.os }}
-          path: dist/*.{AppImage,deb,dmg,exe}
+          path: dist/*.{AppImage,deb,dmg,msi,exe} # Added .msi for windows
 
   release:
     name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required to create the release
+      contents: write
 
     steps:
       - name: Download all installer artifacts
