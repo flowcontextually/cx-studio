@@ -27,17 +27,26 @@ jobs:
       - name: Install npm dependencies
         run: npm install
 
-      - name: Set OS Identifier
-        id: set_os
+      - name: Determine Backend Asset Filename
+        id: set_asset_name
         shell: bash
-        run: echo "OS_ID=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        run: |
+          VERSION="v0.7.0" # This must match the version we are downloading
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            echo "ASSET_NAME=cx-${VERSION}-windows-amd64.zip" >> $GITHUB_ENV
+          elif [[ "${{ runner.os }}" == "macOS" ]]; then
+            echo "ASSET_NAME=cx-${VERSION}-macos-x86_64.tar.gz" >> $GITHUB_ENV
+          else
+            echo "ASSET_NAME=cx-${VERSION}-linux-x86_64.tar.gz" >> $GITHUB_ENV
+          fi
 
       - name: Download cx-server artifact
         uses: robinraju/release-downloader@v1
         with:
           repository: "flowcontextually/cx-shell"
           tag: "v0.7.0"
-          fileName: "cx-*-${{ env.OS_ID }}.*"
+          # Use the exact, full filename. No wildcards.
+          fileName: "${{ env.ASSET_NAME }}"
           out-file-path: "./bin/"
 
       - name: Prepare cx-server executable
