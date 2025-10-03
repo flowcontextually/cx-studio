@@ -1,39 +1,37 @@
 // /home/dpwanjala/repositories/cx-studio/src/widgets/OutputViewer/renderers/TableOutput.tsx
+"use client";
 
 import React, { useMemo } from "react";
 import { HotTable } from "@handsontable/react-wrapper";
 import { Text } from "@mantine/core";
-// --- START OF FIX: Import types from Handsontable ---
 import { Handsontable } from "@/shared/lib/handsontable";
-// --- END OF FIX ---
+import { nanoid } from "nanoid";
 
 interface TableOutputProps {
   data: Record<string, any>[];
 }
 
 export default function TableOutput({ data }: TableOutputProps) {
-  if (!data || data.length === 0) {
-    return <Text c="dimmed">No records to display.</Text>;
-  }
-
+  // --- START OF DEFINITIVE FIX ---
+  // Hooks MUST be called at the top level, unconditionally.
   const { colHeaders, columns, tableData } = useMemo(() => {
-    const headers = Object.keys(data[0]);
+    if (!data || data.length === 0) {
+      return { colHeaders: [], columns: [], tableData: [] };
+    }
 
-    // --- START OF FIX: Define types for the renderer function ---
+    const headers = Object.keys(data[0]);
     const columnSettings = headers.map((key) => ({
       data: key,
       title: key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-      // Type the arguments for the custom renderer function
       renderer: (
-        _instance: Handsontable.Core, // We use an underscore to indicate it's unused
+        _instance: Handsontable.Core,
         td: HTMLTableCellElement,
         _row: number,
         _col: number,
         _prop: string | number,
         value: any,
-        _cellProperties: Handsontable.CellProperties
+        _cellProperties: Handsontable.CellProperties // Prefixed to ignore warning
       ) => {
-        // Now TypeScript knows what 'td' and 'value' are
         if (typeof value === "object" && value !== null) {
           td.innerText = JSON.stringify(value);
         } else {
@@ -42,12 +40,15 @@ export default function TableOutput({ data }: TableOutputProps) {
         return td;
       },
     }));
-    // --- END OF FIX ---
-
     return { colHeaders: headers, columns: columnSettings, tableData: data };
   }, [data]);
 
-  // ... rest of the component remains the same
+  // Now that hooks are done, we can have an early return.
+  if (!tableData || tableData.length === 0) {
+    return <Text c="dimmed">No records to display.</Text>;
+  }
+  // --- END OF DEFINITIVE FIX ---
+
   return (
     <div
       className="handsontable-container"
@@ -63,8 +64,6 @@ export default function TableOutput({ data }: TableOutputProps) {
         autoWrapRow={true}
         autoWrapCol={true}
         manualColumnResize={true}
-        manualRowResize={true}
-        colWidths={150}
         filters={true}
         dropdownMenu={true}
         columnSorting={true}

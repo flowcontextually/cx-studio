@@ -46,6 +46,9 @@ export default function BlockComponent({ block }: BlockComponentProps) {
     updateBlockContent,
     isInspectorVisible,
     toggleInspector,
+    pageParameters,
+    showCodeBlocks,
+    showMarkdownBlocks,
   } = useSessionStore();
 
   const blockResult = blockResults[block.id];
@@ -76,6 +79,7 @@ export default function BlockComponent({ block }: BlockComponentProps) {
         // Send the current content of the block from the store
         block_content: currentBlockState?.content,
         block_run: currentBlockState?.run,
+        parameters: pageParameters,
       },
     });
     // --- END OF DEFINITIVE FIX ---
@@ -117,6 +121,7 @@ export default function BlockComponent({ block }: BlockComponentProps) {
 
   // --- RENDER MARKDOWN BLOCKS (with View/Edit toggle) ---
   if (block.engine === "markdown") {
+    if (!showMarkdownBlocks) return null;
     if (isEditingMarkdown && isSelected) {
       return (
         <Textarea
@@ -202,29 +207,30 @@ export default function BlockComponent({ block }: BlockComponentProps) {
           </ActionIcon>
         </Tooltip>
       </Group>
-
-      <div className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
-        <Editor
-          height="150px"
-          language={codeLang}
-          value={codeToDisplay}
-          onChange={(value) => {
-            // When the user types, we update the `content` field in the store.
-            // When we save, the server will be responsible for parsing this YAML
-            // back into a 'run' object if the engine is 'run'.
-            updateBlockContent(block.id, value || "");
-          }}
-          theme="vs-dark"
-          options={{
-            minimap: { enabled: false },
-            fontSize: 13,
-            wordWrap: "on",
-            scrollBeyondLastLine: false,
-            roundedSelection: false,
-            padding: { top: 10 },
-          }}
-        />
-      </div>
+      {showCodeBlocks && (
+        <div className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+          <Editor
+            height="150px"
+            language={codeLang}
+            value={codeToDisplay}
+            onChange={(value) => {
+              // When the user types, we update the `content` field in the store.
+              // When we save, the server will be responsible for parsing this YAML
+              // back into a 'run' object if the engine is 'run'.
+              updateBlockContent(block.id, value || "");
+            }}
+            theme="vs-dark"
+            options={{
+              minimap: { enabled: false },
+              fontSize: 13,
+              wordWrap: "on",
+              scrollBeyondLastLine: false,
+              roundedSelection: false,
+              padding: { top: 10 },
+            }}
+          />
+        </div>
+      )}
 
       <OutputViewer blockResult={blockResult} />
     </Paper>

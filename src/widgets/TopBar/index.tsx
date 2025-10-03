@@ -15,6 +15,14 @@ export default function TopBar() {
     toggleNavigator,
     toggleInspector,
     toggleTerminal,
+    pageParameters,
+    showCodeBlocks,
+    showMarkdownBlocks,
+    toggleShowCodeBlocks,
+    toggleShowMarkdownBlocks,
+    setShowOutputsOnly,
+    viewMode,
+    setViewMode,
   } = useSessionStore();
 
   const { sendJsonMessage } = useWebSocket();
@@ -37,9 +45,13 @@ export default function TopBar() {
     sendJsonMessage({
       type: "RUN_PAGE",
       command_id: `run-page-${nanoid()}`,
-      payload: { page_id: currentPage.id },
+      payload: {
+        page_id: currentPage.id,
+        parameters: pageParameters,
+      },
     });
   };
+  const isOutputsOnly = !showCodeBlocks && !showMarkdownBlocks;
 
   return (
     <Box
@@ -81,7 +93,7 @@ export default function TopBar() {
         <Menu shadow="md" width={200}>
           <Menu.Target>
             <Button variant="subtle" size="xs">
-              View
+              Panels
             </Button>
           </Menu.Target>
           <Menu.Dropdown>
@@ -103,15 +115,55 @@ export default function TopBar() {
             >
               Terminal / Log Panel
             </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+
+        <Menu shadow="md" width={240}>
+          <Menu.Target>
+            <Button variant="subtle" size="xs">
+              View
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>Perspective</Menu.Label>
+            <Menu.Item
+              onClick={() => setViewMode("document")}
+              rightSection={viewMode === "document" ? "✓" : ""}
+            >
+              Document View
+            </Menu.Item>
+            <Menu.Item
+              onClick={() => setViewMode("grid")}
+              rightSection={viewMode === "grid" ? "✓" : ""}
+            >
+              Grid View
+            </Menu.Item>
+            <Menu.Item
+              onClick={() => setViewMode("graph")}
+              rightSection={viewMode === "graph" ? "✓" : ""}
+            >
+              Graph View
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Label>Content Visibility</Menu.Label>
+            <Menu.Item
+              onClick={toggleShowMarkdownBlocks}
+              rightSection={showMarkdownBlocks ? "✓" : ""}
+            >
+              Show Markdown
+            </Menu.Item>
+            <Menu.Item
+              onClick={toggleShowCodeBlocks}
+              rightSection={showCodeBlocks ? "✓" : ""}
+            >
+              Show Code Blocks
+            </Menu.Item>
             <Menu.Divider />
             <Menu.Item
-              onClick={() => {
-                if (isNavigatorVisible) toggleNavigator();
-                if (isInspectorVisible) toggleInspector();
-                if (isTerminalVisible) toggleTerminal();
-              }}
+              onClick={() => setShowOutputsOnly(!isOutputsOnly)}
+              rightSection={isOutputsOnly ? "✓" : ""}
             >
-              Toggle Focus Mode
+              Show Outputs Only
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>

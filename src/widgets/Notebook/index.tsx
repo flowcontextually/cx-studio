@@ -4,17 +4,30 @@
 import React from "react";
 import { Box, ScrollArea, Center, Text } from "@mantine/core";
 import { useSessionStore } from "@/shared/store/useSessionStore";
-import BlockComponent from "./BlockComponent"; // <-- IMPORT THE NEW COMPONENT
+import DocumentView from "./views/DocumentView";
+import GridView from "./views/GridView";
+import GraphView from "./views/GraphView";
 
 export default function Notebook() {
-  const currentPage = useSessionStore((state) => state.currentPage);
+  const { currentPage, viewMode } = useSessionStore();
+
+  const renderView = () => {
+    switch (viewMode) {
+      case "grid":
+        return <GridView />;
+      case "graph":
+        return <GraphView />;
+      case "document":
+      default:
+        return <DocumentView />;
+    }
+  };
 
   return (
     <Box className="h-full flex flex-col bg-white dark:bg-black">
       <ScrollArea className="flex-grow">
         <Box p="xl">
           {currentPage ? (
-            // --- REPLACE THE TEXT COMPONENT WITH THIS MAPPING LOGIC ---
             <>
               <Box mb="xl">
                 <Text size="xl" fw={700}>
@@ -24,9 +37,8 @@ export default function Notebook() {
                   <Text c="dimmed">{currentPage.description}</Text>
                 )}
               </Box>
-              {currentPage.blocks.map((block) => (
-                <BlockComponent key={block.id} block={block} />
-              ))}
+
+              {renderView()}
             </>
           ) : (
             <Center h="100%">

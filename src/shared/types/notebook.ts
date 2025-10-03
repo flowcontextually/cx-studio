@@ -15,10 +15,18 @@ export interface Block {
   };
 }
 
+export interface PageInputParameter {
+  description?: string;
+  type?: string;
+  required?: boolean;
+  default?: any;
+}
+
 export interface ContextualPage {
   id?: string;
   name: string;
   description?: string;
+  inputs?: Record<string, PageInputParameter>;
   blocks: Block[];
 }
 
