@@ -31,12 +31,14 @@ jobs:
         shell: bash
         run: |
           VERSION="v0.7.0"
+          # This logic now EXACTLY mirrors the cx-shell release workflow
+          OS_NAME=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]' | sed 's/-latest//')
+
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            echo "ASSET_NAME=cx-${VERSION}-windows-amd64.zip" >> $GITHUB_ENV
-          elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            echo "ASSET_NAME=cx-${VERSION}-macos-x86_64.tar.gz" >> $GITHUB_ENV
+            echo "ASSET_NAME=cx-${VERSION}-${OS_NAME}-amd64.zip" >> $GITHUB_ENV
           else
-            echo "ASSET_NAME=cx-${VERSION}-linux-x86_64.tar.gz" >> $GITHUB_ENV
+            # This handles both 'macos' and 'ubuntu' correctly
+            echo "ASSET_NAME=cx-${VERSION}-${OS_NAME}-x86_64.tar.gz" >> $GITHUB_ENV
           fi
 
       - name: Download cx-server artifact
